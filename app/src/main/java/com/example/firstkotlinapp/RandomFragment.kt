@@ -7,8 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 
 
-class RecycleFragment : Fragment() {
- 
+class RandomFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -19,8 +18,8 @@ class RecycleFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-
-        return inflater.inflate(R.layout.fragment_recycle, container, false)
+        // Inflate the layout for this fragment
+        return inflater.inflate(R.layout.fragment_random, container, false)
     }
 
 
