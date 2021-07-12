@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#6200EE</color>
-    <color name="colorPrimaryDark">#3700B3</color>
-    <color name="colorAccent">#03DAC5</color>
+    <color name="colorPrimary">#2196F3</color>
+    <color name="colorPrimaryDark">#1976D2</color>
+    <color name="colorAccent">#2196F3</color>
+    <color name="black_transp">#AB000000</color>
+    <color name="transp_white">#99FFFFFF</color>
+    <color name="disabled_btn">#C8D5DA</color>
+    <color name="blue_standard">#D802F1F8</color>
 </resources>

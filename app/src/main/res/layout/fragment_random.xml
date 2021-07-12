@@ -1,14 +1,119 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".RandomFragment">
+    android:layout_height="415dp"
+    android:layout_gravity="top">
 
-    <!-- TODO: Update blank fragment layout -->
-    <TextView
+
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/nestedScrollView"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="@string/hello_blank_fragment" />
+        android:layout_height="415dp"
+        android:layout_marginTop="@dimen/eight_step"
+        android:layout_marginEnd="@dimen/eight_step"
+        android:layout_marginBottom="@dimen/eight_step"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.0">
 
-</FrameLayout>
+        <androidx.cardview.widget.CardView
+            android:id="@+id/rnd_cardview"
+            android:layout_width="match_parent"
+            android:layout_height="650dp"
+            android:layout_marginStart="@dimen/eight_step"
+            android:layout_marginTop="@dimen/sixteen_step"
+            android:layout_marginEnd="@dimen/eight_step"
+            android:layout_marginBottom="@dimen/sixteen_step"
+            app:cardCornerRadius="15dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <androidx.appcompat.widget.AppCompatImageView
+                    android:id="@+id/load_image"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:adjustViewBounds="true"
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/waiting_background" />
+
+                <ProgressBar
+                    android:id="@+id/load_progressbar"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerHorizontal="true"
+                    android:layout_centerVertical="true"
+                    android:indeterminate="true"
+                    android:paddingBottom="?actionBarSize"
+                    android:theme="@style/Theme.AppCompat.Light"
+                    android:visibility="visible" />
+
+
+                <androidx.appcompat.widget.LinearLayoutCompat
+                    android:id="@+id/load_linear_layout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentBottom="true"
+                    android:background="@color/black_transp"
+                    android:orientation="vertical"
+                    android:paddingStart="@dimen/sixteen_step"
+                    android:paddingEnd="@dimen/sixteen_step">
+
+                    <androidx.appcompat.widget.AppCompatTextView
+                        android:id="@+id/load_description"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textAppearance="@style/TextAppearance.AppCompat.Widget.ActionBar.Title"
+                        android:textColor="@android:color/white" />
+
+                    <androidx.appcompat.widget.AppCompatTextView
+                        android:id="@+id/load_author"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textAppearance="@style/TextAppearance.AppCompat.Widget.ActionBar.Subtitle"
+                        android:textColor="@color/transp_white" />
+                </androidx.appcompat.widget.LinearLayoutCompat>
+
+
+                <Button
+                    android:id="@+id/recycl_error_btn"
+                    style="@style/Widget.MaterialComponents.Button.TextButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="58dp"
+                    android:layout_alignParentTop="true"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="267dp"
+                    android:text="@string/retry"
+                    android:textColor="@android:color/white"
+                    android:visibility="gone" />
+
+            </RelativeLayout>
+        </androidx.cardview.widget.CardView>
+    </androidx.core.widget.NestedScrollView>
+
+
+    <ProgressBar
+        android:id="@+id/recycle_error_progressbar"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="200dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/progress_bar_len"
+        android:indeterminate="true"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="@+id/nestedScrollView"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

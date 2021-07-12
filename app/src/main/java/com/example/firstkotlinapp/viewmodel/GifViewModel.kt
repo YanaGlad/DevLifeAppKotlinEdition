@@ -8,9 +8,10 @@ import com.example.firstkotlinapp.values.ErrorHandler
 class GifViewModel : ViewModel() {
     private val isCurrentGifLoaded = MutableLiveData(false)
     var error: MutableLiveData<ErrorHandler> = MutableLiveData<ErrorHandler>(ErrorHandler())
-        set(value) {
-            field = value
-        }
+
+    fun setError(handler: ErrorHandler) {
+        error.value = handler
+    }
 
     fun getIsCurrentGifLoaded(): LiveData<Boolean> {
         return isCurrentGifLoaded

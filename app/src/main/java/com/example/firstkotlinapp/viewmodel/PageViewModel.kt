@@ -4,11 +4,11 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 
-class PageViewModel : ViewModel() {
+open class PageViewModel : ViewModel() {
     private val canLoadPrevious = MutableLiveData(false)
     private val canLoadNext = MutableLiveData(false)
 
-    fun getCanLoadPrevious(): LiveData<Boolean> {
+    open fun getCanLoadPrevious(): LiveData<Boolean> {
         return canLoadPrevious
     }
 
@@ -16,11 +16,11 @@ class PageViewModel : ViewModel() {
         this.canLoadPrevious.value = canLoadPrevious
     }
 
-    fun getCanLoadNext(): LiveData<Boolean> {
+    open fun getCanLoadNext(): LiveData<Boolean> {
         return canLoadNext
     }
 
-    fun setCanLoadNext(canLoadNext: Boolean) {
+    open fun setCanLoadNext(canLoadNext: Boolean) {
         this.canLoadNext.value = canLoadNext
     }
 }

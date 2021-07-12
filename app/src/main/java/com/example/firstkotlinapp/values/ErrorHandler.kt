@@ -2,7 +2,7 @@ package com.example.firstkotlinapp.values
 
 class ErrorHandler {
     var currentError = type_error[0]
-        private set
+        get() = field
 
     fun setSuccess() {
         currentError = type_error[0]

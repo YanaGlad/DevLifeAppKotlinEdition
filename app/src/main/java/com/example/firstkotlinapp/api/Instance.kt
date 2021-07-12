@@ -15,6 +15,7 @@ object Instance {
 
             builder = Retrofit.Builder()
                 .baseUrl(DOMAIN)
+                .addConverterFactory(GsonConverterFactory.create())
                 .client(okHttpBuiler.build())
         }
         return builder!!.build()
