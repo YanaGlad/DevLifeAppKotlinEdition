@@ -28,7 +28,7 @@ import retrofit2.Response
 class RecyclerFragment : ButtonSupportedFragment() {
     var isOnScreen = false
     private var type: String? = null
-    private var recyclerFragmentViewModel: RecyclerFragmentViewModel? = null
+    private lateinit var recyclerFragmentViewModel: RecyclerFragmentViewModel
     private var gifsRecyclerAdapter: GifsRecyclerAdapter? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -37,7 +37,7 @@ class RecyclerFragment : ButtonSupportedFragment() {
         )
         if (arguments != null) {
             type = requireArguments().getString("TAB_TYPE")
-            recyclerFragmentViewModel!!.setType(type)
+            recyclerFragmentViewModel.setType(type)
         } else {
             Log.e("TAG_MAIN_FRAG", "No arguments in bundle")
         }
@@ -48,39 +48,39 @@ class RecyclerFragment : ButtonSupportedFragment() {
     private val gifsCallback: Callback<Gifs?> = object : Callback<Gifs?> {
         override fun onResponse(call: Call<Gifs?>, response: Response<Gifs?>) {
             if (response.isSuccessful()) {
-                recyclerFragmentViewModel!!.setCanLoadNext(true)
+                recyclerFragmentViewModel.setCanLoadNext(true)
                 if (response.body() != null) response.body()!!.gifs?.let {
-                    recyclerFragmentViewModel!!.createListOfGifModels(it)
+                    recyclerFragmentViewModel.createListOfGifModels(it)
                 }
             } else {
                 val errorHandler = ErrorHandler()
                 errorHandler.setLoadError()
-                recyclerFragmentViewModel!!.setError(errorHandler)
+                recyclerFragmentViewModel.setError(errorHandler)
             }
         }
 
         override fun onFailure(call: Call<Gifs?>, t: Throwable) {
             val errorHandler = ErrorHandler()
             errorHandler.setLoadError()
-            recyclerFragmentViewModel!!.setError(errorHandler)
+            recyclerFragmentViewModel.setError(errorHandler)
         }
     }
 
     fun loadGifs(pageOperation: PageOperation?, type: String?) {
-        recyclerFragmentViewModel!!.setCanLoadNext(
-            recyclerFragmentViewModel!!.error.getValue()!!.currentError
+        recyclerFragmentViewModel.setCanLoadNext(
+            recyclerFragmentViewModel.error.getValue()!!.currentError
                 .equals(ErrorHandler.success())
         )
-        recyclerFragmentViewModel!!.currentPage.getValue()?.let {
+        recyclerFragmentViewModel.currentPage.getValue()?.let {
             if (pageOperation != null) {
-                recyclerFragmentViewModel!!.setCurrentPage(
+                recyclerFragmentViewModel.setCurrentPage(
                     it, pageOperation
                 )
             }
         }
         val service: Api = Instance.getInstance().create(Api::class.java)
         when (type) {
-            "latest" -> recyclerFragmentViewModel!!.currentPage.getValue()?.let {
+            "latest" -> recyclerFragmentViewModel.currentPage.getValue()?.let {
                 service.getLatestGifs(
                     it,
                     10,
@@ -88,7 +88,7 @@ class RecyclerFragment : ButtonSupportedFragment() {
                 )!!.enqueue(gifsCallback)
             }
             "top" -> service.getTopGifs(
-                recyclerFragmentViewModel!!.currentPage.getValue()!!,
+                recyclerFragmentViewModel.currentPage.getValue()!!,
                 10,
                 "gif"
             )!!.enqueue(gifsCallback)
@@ -111,11 +111,11 @@ class RecyclerFragment : ButtonSupportedFragment() {
         recyclerView.layoutManager = GridLayoutManager(context, 1)
         onNextClickListener = View.OnClickListener { loadGifs(PageOperation.NEXT, type) }
         onPrevClickListener = View.OnClickListener { loadGifs(PageOperation.PREVIOUS, type) }
-        recyclerFragmentViewModel!!.getGifModels().observe(viewLifecycleOwner) { gifs ->
+        recyclerFragmentViewModel.getGifModels().observe(viewLifecycleOwner) { gifs ->
             if (gifs != null) {
                 errorHandler.setSuccess()
-                recyclerFragmentViewModel!!.setError(errorHandler)
-                gifsRecyclerAdapter = recyclerFragmentViewModel!!.type.getValue()?.let {
+                recyclerFragmentViewModel.setError(errorHandler)
+                gifsRecyclerAdapter = recyclerFragmentViewModel.type.getValue()?.let {
                     GifsRecyclerAdapter(
                         requireContext(),
                         gifs,
@@ -125,9 +125,9 @@ class RecyclerFragment : ButtonSupportedFragment() {
                 recyclerView.adapter = gifsRecyclerAdapter
             }
         }
-        recyclerFragmentViewModel!!.error.observe(viewLifecycleOwner) { e ->
-            recyclerFragmentViewModel!!.updateCanLoadPrevious()
-            recyclerFragmentViewModel!!.setCanLoadNext(true)
+        recyclerFragmentViewModel.error.observe(viewLifecycleOwner) { e ->
+            recyclerFragmentViewModel.updateCanLoadPrevious()
+            recyclerFragmentViewModel.setCanLoadNext(true)
             errorProgressBar.visibility = View.INVISIBLE
             if (!(e.currentError == ErrorHandler.success())) {
                 recyclerView.visibility = View.GONE
@@ -150,12 +150,12 @@ class RecyclerFragment : ButtonSupportedFragment() {
                 recyclerView.visibility = View.VISIBLE
             }
         }
-        recyclerFragmentViewModel!!.getCanLoadNext().observe(viewLifecycleOwner) { enabled ->
+        recyclerFragmentViewModel.getCanLoadNext().observe(viewLifecycleOwner) { enabled ->
             if (isOnScreen) btnNex?.setEnabled(
                 enabled
             )
         }
-        recyclerFragmentViewModel!!.getCanLoadPrevious().observe(viewLifecycleOwner) { enabled ->
+        recyclerFragmentViewModel.getCanLoadPrevious().observe(viewLifecycleOwner) { enabled ->
             if (isOnScreen) btnPrev?.setEnabled(
                 enabled
             )
@@ -164,11 +164,11 @@ class RecyclerFragment : ButtonSupportedFragment() {
     }
 
     override fun nextEnabled(): Boolean {
-        return recyclerFragmentViewModel?.getCanLoadNext()?.getValue() == true
+        return recyclerFragmentViewModel.getCanLoadNext().getValue() == true
     }
 
     override fun previousEnabled(): Boolean {
-        return recyclerFragmentViewModel?.getCanLoadPrevious()?.getValue()!!
+        return recyclerFragmentViewModel.getCanLoadPrevious().getValue()!!
     }
 
     companion object {

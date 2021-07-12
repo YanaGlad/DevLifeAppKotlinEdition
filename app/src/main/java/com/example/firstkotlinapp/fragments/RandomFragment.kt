@@ -25,6 +25,7 @@ import com.example.firstkotlinapp.R
 import com.example.firstkotlinapp.api.Api
 import com.example.firstkotlinapp.api.Instance
 import com.example.firstkotlinapp.models.Gif
+import com.example.firstkotlinapp.models.GifModel
 import com.example.firstkotlinapp.values.ErrorHandler
 import com.example.firstkotlinapp.viewmodel.RandomFragmentViewModel
 import retrofit2.Call
@@ -39,11 +40,12 @@ class RandomFragment : ButtonSupportedFragment() {
         field = value
     }
     private lateinit var randomFragmentViewModel: RandomFragmentViewModel
-    private var image: AppCompatImageView? = null
-    private var toolbar: LinearLayoutCompat? = null
-    private var title: AppCompatTextView? = null
-    private var subtitle: AppCompatTextView? = null
-    private var savedUrl: String? = null
+    private lateinit var image: AppCompatImageView
+    private lateinit var toolbar: LinearLayoutCompat
+    private lateinit var title: AppCompatTextView
+    private lateinit var subtitle: AppCompatTextView
+    private lateinit var savedUrl: String
+
     private val gifCallback: Callback<Gif?> = object : Callback<Gif?> {
         override fun onResponse(call: Call<Gif?>, response: Response<Gif?>) {
             if (response.isSuccessful()) {
@@ -114,12 +116,12 @@ class RandomFragment : ButtonSupportedFragment() {
         btnNex = requireActivity().findViewById(R.id.btn_next)
         btnPrev?.setOnClickListener(onPrevClickListener)
         btnNex?.setOnClickListener(onNextClickListener)
-        title?.setText("")
-        subtitle?.setText("")
-        randomFragmentViewModel.getCurrentGif().observe(viewLifecycleOwner) { gif ->
+        title.text = ""
+        subtitle.text = ""
+        randomFragmentViewModel.getCurrentGif().observe(viewLifecycleOwner) { gif: GifModel? ->
             if (gif != null) {
-                title?.setText(gif.description)
-                subtitle?.setText(view.context.getString(R.string.by) + gif.author)
+                title.text = gif.description
+                subtitle.text = view.context.getString(R.string.by) + gif.author
             }
         }
         randomFragmentViewModel.getIsCurrentGifLoaded().observe(
@@ -143,7 +145,7 @@ class RandomFragment : ButtonSupportedFragment() {
             randomFragmentViewModel.updateCanLoadPrevious()
             errorProgressBar.visibility = View.INVISIBLE
             if (!(e.currentError == ErrorHandler.success())) {
-                toolbar?.setVisibility(View.GONE)
+                toolbar.setVisibility(View.GONE)
                 when (e.currentError) {
                     "LOAD_ERROR" -> errorButton.visibility = View.VISIBLE
                     "IMAGE_ERROR" -> {
@@ -163,7 +165,7 @@ class RandomFragment : ButtonSupportedFragment() {
             } else {
                 errorButton.visibility = View.GONE
                 errorProgressBar.visibility = View.GONE
-                toolbar?.setVisibility(View.VISIBLE)
+                toolbar.setVisibility(View.VISIBLE)
             }
         }
         return view
@@ -208,17 +210,17 @@ class RandomFragment : ButtonSupportedFragment() {
                     return false
                 }
             })
-            .into(image!!)
+            .into(image)
     }
 
-    fun setupErrorParams(context: Context?, assetManager: AssetManager?) {
-        image!!.setImageResource(R.color.disabled_btn)
+    private fun setupErrorParams(context: Context?, assetManager: AssetManager?) {
+        image.setImageResource(R.color.disabled_btn)
 
 //        Glide.with(context)
 //                .load(Support.loadBitmapImage(assetManager, "devnull.png"))
 //                .into(image);
-        title!!.setText(R.string.no_internet)
-        subtitle!!.text = ":("
+        title.setText(R.string.no_internet)
+        subtitle.text = ":("
     }
 
     private fun loadGif() {
@@ -227,16 +229,16 @@ class RandomFragment : ButtonSupportedFragment() {
             val api: Api = Instance.getInstance().create(Api::class.java)
             api.getRandomGif()!!.enqueue(gifCallback)
         } else loadGifWithGlide(
-            randomFragmentViewModel.getCurrentGif().getValue()?.gifURL
+            randomFragmentViewModel.getCurrentGif().value?.gifURL
         )
     }
 
     override fun nextEnabled(): Boolean {
-        return randomFragmentViewModel.getCanLoadNext().getValue()!!
+        return randomFragmentViewModel.getCanLoadNext().value!!
     }
 
     override fun previousEnabled(): Boolean {
-        return randomFragmentViewModel.getCanLoadPrevious().getValue()!!
+        return randomFragmentViewModel.getCanLoadPrevious().value!!
     }
 
     companion object {
