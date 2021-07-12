@@ -38,7 +38,7 @@ class RandomFragment : ButtonSupportedFragment() {
     set(value) {
         field = value
     }
-    private var randomFragmentViewModel: RandomFragmentViewModel? = null
+    private lateinit var randomFragmentViewModel: RandomFragmentViewModel
     private var image: AppCompatImageView? = null
     private var toolbar: LinearLayoutCompat? = null
     private var title: AppCompatTextView? = null
@@ -47,26 +47,26 @@ class RandomFragment : ButtonSupportedFragment() {
     private val gifCallback: Callback<Gif?> = object : Callback<Gif?> {
         override fun onResponse(call: Call<Gif?>, response: Response<Gif?>) {
             if (response.isSuccessful()) {
-                if (randomFragmentViewModel?.getError()
-                    ?.getValue()!!.currentError == ErrorHandler.loadError()
+                if (randomFragmentViewModel.getError()
+                    .getValue()!!.currentError == ErrorHandler.loadError()
                 )
                     errorHandler.setSuccess()
-                randomFragmentViewModel?.setAppError(errorHandler)
+                randomFragmentViewModel.setAppError(errorHandler)
                 if (response.body() != null) {
                     response.body()!!.createGifModel()
-                        ?.let { randomFragmentViewModel?.addGifModel(it) }
+                        ?.let { randomFragmentViewModel.addGifModel(it) }
                     loadGifWithGlide(response.body()!!.createGifModel()?.gifURL)
                 }
             } else {
                 errorHandler.setLoadError()
-                randomFragmentViewModel?.setAppError(errorHandler)
+                randomFragmentViewModel.setAppError(errorHandler)
                 Log.e("Callback error", "Can't load post")
             }
         }
 
         override fun onFailure(call: Call<Gif?>, t: Throwable) {
             errorHandler.setLoadError()
-            randomFragmentViewModel?.setAppError(errorHandler)
+            randomFragmentViewModel.setAppError(errorHandler)
             Log.e("Callback error", "onFailure: $t")
         }
     }
@@ -80,11 +80,11 @@ class RandomFragment : ButtonSupportedFragment() {
         api.getRandomGif()?.enqueue(gifCallback)
 
         onPrevClickListener = View.OnClickListener {
-            if (!randomFragmentViewModel!!.goBack()) Log.e(
+            if (!randomFragmentViewModel.goBack()) Log.e(
                 "Cache is empty",
                 "No cached gifs"
             ) else loadGifWithGlide(
-                randomFragmentViewModel!!.getCurrentGif().value?.gifURL
+                randomFragmentViewModel.getCurrentGif().value?.gifURL
             )
 
             try {
@@ -116,31 +116,31 @@ class RandomFragment : ButtonSupportedFragment() {
         btnNex?.setOnClickListener(onNextClickListener)
         title?.setText("")
         subtitle?.setText("")
-        randomFragmentViewModel?.getCurrentGif()?.observe(viewLifecycleOwner) { gif ->
+        randomFragmentViewModel.getCurrentGif().observe(viewLifecycleOwner) { gif ->
             if (gif != null) {
                 title?.setText(gif.description)
                 subtitle?.setText(view.context.getString(R.string.by) + gif.author)
             }
         }
-        randomFragmentViewModel?.getIsCurrentGifLoaded()?.observe(
+        randomFragmentViewModel.getIsCurrentGifLoaded().observe(
             viewLifecycleOwner
         ) { isLoaded ->
             if (isLoaded) loadProgress.visibility = View.INVISIBLE else loadProgress.visibility =
                 View.VISIBLE
         }
-        randomFragmentViewModel?.getCanLoadNext()
-            ?.observe(viewLifecycleOwner) { enabled: Boolean? ->
+        randomFragmentViewModel.getCanLoadNext()
+            .observe(viewLifecycleOwner) { enabled: Boolean? ->
                 if (isOnScreen) btnNex?.setEnabled(
                     enabled!!
                 )
             }
-        randomFragmentViewModel?.getCanLoadPrevious()?.observe(viewLifecycleOwner) { enabled ->
+        randomFragmentViewModel.getCanLoadPrevious().observe(viewLifecycleOwner) { enabled ->
             if (isOnScreen) btnPrev?.setEnabled(
                 enabled
             )
         }
-        randomFragmentViewModel?.getError()?.observe(viewLifecycleOwner) { e ->
-            randomFragmentViewModel?.updateCanLoadPrevious()
+        randomFragmentViewModel.getError().observe(viewLifecycleOwner) { e ->
+            randomFragmentViewModel.updateCanLoadPrevious()
             errorProgressBar.visibility = View.INVISIBLE
             if (!(e.currentError == ErrorHandler.success())) {
                 toolbar?.setVisibility(View.GONE)
@@ -149,7 +149,7 @@ class RandomFragment : ButtonSupportedFragment() {
                     "IMAGE_ERROR" -> {
                         errorButton.visibility = View.VISIBLE
                         setupErrorParams(context, requireContext().assets)
-                        randomFragmentViewModel?.setCanLoadNext(false)
+                        randomFragmentViewModel.setCanLoadNext(false)
                     }
                 }
                 errorButton.setOnClickListener { v: View? ->
@@ -170,8 +170,8 @@ class RandomFragment : ButtonSupportedFragment() {
     }
 
     private fun loadGifWithGlide(url: String?) {
-        randomFragmentViewModel?.setIsCurrentGifLoaded(false)
-        randomFragmentViewModel?.setCanLoadNext(false)
+        randomFragmentViewModel.setIsCurrentGifLoaded(false)
+        randomFragmentViewModel.setCanLoadNext(false)
         Glide.with(requireActivity())
             .asGif()
             .load(url)
@@ -186,7 +186,7 @@ class RandomFragment : ButtonSupportedFragment() {
                 ): Boolean {
                     errorHandler.setImageError()
                     savedUrl = model as String
-                    randomFragmentViewModel?.setAppError(errorHandler)
+                    randomFragmentViewModel.setAppError(errorHandler)
                     return false
                 }
 
@@ -197,14 +197,14 @@ class RandomFragment : ButtonSupportedFragment() {
                     dataSource: DataSource,
                     isFirstResource: Boolean
                 ): Boolean {
-                    if (randomFragmentViewModel?.getError()
-                        ?.getValue()?.currentError == ErrorHandler.imageError()
+                    if (randomFragmentViewModel.getError()
+                        .getValue()?.currentError == ErrorHandler.imageError()
                     ) {
                         errorHandler.setSuccess()
-                        randomFragmentViewModel?.setAppError(errorHandler)
+                        randomFragmentViewModel.setAppError(errorHandler)
                     }
-                    randomFragmentViewModel?.setIsCurrentGifLoaded(true)
-                    randomFragmentViewModel?.setCanLoadNext(true)
+                    randomFragmentViewModel.setIsCurrentGifLoaded(true)
+                    randomFragmentViewModel.setCanLoadNext(true)
                     return false
                 }
             })
@@ -222,21 +222,21 @@ class RandomFragment : ButtonSupportedFragment() {
     }
 
     private fun loadGif() {
-        if (!randomFragmentViewModel?.goNext()!!) {
-            randomFragmentViewModel?.setCanLoadNext(false)
+        if (!randomFragmentViewModel.goNext()) {
+            randomFragmentViewModel.setCanLoadNext(false)
             val api: Api = Instance.getInstance().create(Api::class.java)
             api.getRandomGif()!!.enqueue(gifCallback)
         } else loadGifWithGlide(
-            randomFragmentViewModel?.getCurrentGif()?.getValue()?.gifURL
+            randomFragmentViewModel.getCurrentGif().getValue()?.gifURL
         )
     }
 
     override fun nextEnabled(): Boolean {
-        return randomFragmentViewModel?.getCanLoadNext()?.getValue()!!
+        return randomFragmentViewModel.getCanLoadNext().getValue()!!
     }
 
     override fun previousEnabled(): Boolean {
-        return randomFragmentViewModel?.getCanLoadPrevious()?.getValue()!!
+        return randomFragmentViewModel.getCanLoadPrevious().getValue()!!
     }
 
     companion object {
