@@ -22,7 +22,7 @@ data class Gif(
     @field:SerializedName("canVote") val canVote: Boolean?,
 ) {
 
-    fun createGifModel(): GifModel? {
+    fun createGifModel(): GifModel {
         return GifModel(
             id!!,
             description!!,
