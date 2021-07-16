@@ -13,7 +13,9 @@ import android.widget.ProgressBar
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.appcompat.widget.LinearLayoutCompat
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewModelScope
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.DataSource
 import com.bumptech.glide.load.engine.DiskCacheStrategy
@@ -28,6 +30,7 @@ import com.example.firstkotlinapp.models.Gif
 import com.example.firstkotlinapp.models.GifModel
 import com.example.firstkotlinapp.values.ErrorHandler
 import com.example.firstkotlinapp.viewmodel.RandomFragmentViewModel
+import kotlinx.coroutines.launch
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -39,7 +42,7 @@ class RandomFragment : ButtonSupportedFragment() {
         set(value) {
             field = value
         }
-    private lateinit var randomFragmentViewModel: RandomFragmentViewModel
+    private val randomFragmentViewModel: RandomFragmentViewModel by viewModels()
     private lateinit var image: AppCompatImageView
     private lateinit var toolbar: LinearLayoutCompat
     private lateinit var title: AppCompatTextView
@@ -75,11 +78,21 @@ class RandomFragment : ButtonSupportedFragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        randomFragmentViewModel = ViewModelProvider(this).get(
-            RandomFragmentViewModel::class.java
-        )
-        val api: Api = Instance.getInstance().create(Api::class.java)
-        api.getRandomGif().enqueue(gifCallback)
+       /// randomFragmentViewModel = ViewModelProvider(this).get(
+       //     RandomFragmentViewModel::class.java
+       // )
+
+
+        randomFragmentViewModel.viewModelScope.launch {
+            randomFragmentViewModel.loadRandomGif()
+            loadGifWithGlide(randomFragmentViewModel.getCurrentGif().value?.gifURL)
+         //   viewModel.loadApod()
+          //  explanation?.setText(viewModel.apodModel?.explanation)
+           // viewModel.apodModel?.url?.let { loadGifWithGlide(it) }
+        }
+
+//        val api: Api = Instance.getInstance().create(Api::class.java)
+//        api.getRandomGif().enqueue(gifCallback)
 
         onPrevClickListener = View.OnClickListener {
             if (!randomFragmentViewModel.goBack()) Log.e(
@@ -222,8 +235,17 @@ class RandomFragment : ButtonSupportedFragment() {
     private fun loadGif() {
         if (!randomFragmentViewModel.goNext()) {
             randomFragmentViewModel.setCanLoadNext(false)
-            val api: Api = Instance.getInstance().create(Api::class.java)
-            api.getRandomGif().enqueue(gifCallback)
+
+            randomFragmentViewModel.viewModelScope.launch {
+                randomFragmentViewModel.loadRandomGif()
+                loadGifWithGlide(randomFragmentViewModel.getCurrentGif().value?.gifURL)
+                //   viewModel.loadApod()
+                //  explanation?.setText(viewModel.apodModel?.explanation)
+                // viewModel.apodModel?.url?.let { loadGifWithGlide(it) }
+            }
+
+//            val api: Api = Instance.getInstance().create(Api::class.java)
+//            api.getRandomGif().enqueue(gifCallback)
         } else loadGifWithGlide(
             randomFragmentViewModel.getCurrentGif().value?.gifURL
         )
@@ -238,6 +260,6 @@ class RandomFragment : ButtonSupportedFragment() {
     }
 
     companion object {
-        private val errorHandler: ErrorHandler = ErrorHandler()
+        internal val errorHandler: ErrorHandler = ErrorHandler()
     }
 }

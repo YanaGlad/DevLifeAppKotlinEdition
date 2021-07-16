@@ -3,6 +3,9 @@ package com.example.firstkotlinapp.viewmodel
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import com.example.firstkotlinapp.api.Api
+import com.example.firstkotlinapp.api.Instance
+import com.example.firstkotlinapp.fragments.RandomFragment
 import com.example.firstkotlinapp.models.GifModel
 import com.example.firstkotlinapp.values.ErrorHandler
 import java.util.*
@@ -12,6 +15,30 @@ class RandomFragmentViewModel : PageViewModel() {
     private val currentGif: MutableLiveData<GifModel?> = MutableLiveData(null)
     private val error: MutableLiveData<ErrorHandler> = MutableLiveData<ErrorHandler>(ErrorHandler())
     private val gifModels: MutableList<GifModel> = ArrayList<GifModel>()
+
+
+    suspend fun loadRandomGif() {
+        val response = Instance.getInstance().create(Api::class.java).getRandomGif()
+
+        if (response.isSuccessful()) {
+            if (response.isSuccessful) {
+                if (error.value!!.currentError == ErrorHandler.loadError())
+                    RandomFragment.errorHandler.setSuccess()
+                setAppError(RandomFragment.errorHandler)
+                if (response.body() != null) {
+                    response.body()!!.createGifModel()
+                        .let { addGifModel(it) }
+                    //   loadGifWithGlide(response.body()!!.createGifModel().gifURL)
+                }
+            } else {
+                RandomFragment.errorHandler.setLoadError()
+                setAppError(RandomFragment.errorHandler)
+                Log.e("Callback error", "Can't load post")
+            }
+
+        }
+    }
+
     fun getError(): MutableLiveData<ErrorHandler> {
         return error
     }
