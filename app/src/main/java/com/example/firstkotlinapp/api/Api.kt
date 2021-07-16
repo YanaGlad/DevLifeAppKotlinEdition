@@ -12,19 +12,19 @@ interface Api {
 
     @GET("/random?json=true")
     suspend fun getRandomGif() : Response<Gif>
-    //fun getRandomGif(): Call<Gif>
 
     @GET("/latest/{page}?json=true")
-    fun getLatestGifs(
-        @Path("page") page: Int,
-        @Query("pageSize") pageSize: Int,
-        @Query("types") types: String?
-    ): Call<Gifs>
+    suspend fun getLatestGifs(
+        @Path(value = "page", encoded = true)page: Int,
+        @Query(value = "pageSize", encoded = true)pageSize:Int,
+        @Query(value = "types", encoded = true)types: String?
+    ) : Response<Gifs>
+
 
     @GET("/top/{page}?json=true")
-    fun getTopGifs(
-        @Path("page") page: Int,
-        @Query("pageSize") pageSize: Int,
-        @Query("types") types: String?
-    ): Call<Gifs>
+    suspend fun getTopGifs(
+        @Path(value = "page", encoded = true)page: Int,
+        @Query(value = "pageSize", encoded = true)pageSize:Int,
+        @Query(value = "types", encoded = true)types: String?
+    ) : Response<Gifs>
 }

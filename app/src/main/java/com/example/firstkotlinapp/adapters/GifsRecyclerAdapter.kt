@@ -14,8 +14,10 @@ import java.util.*
 
 class GifsRecyclerAdapter(var context: Context, gifModels: ArrayList<GifModel>, type: String) :
     RecyclerView.Adapter<GifViewHolder>() {
+
     var gifModels: List<GifModel>
     private val type: String
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): GifViewHolder {
         val view: View = LayoutInflater.from(context).inflate(R.layout.load_item, parent, false)
         return GifViewHolder(context, view)

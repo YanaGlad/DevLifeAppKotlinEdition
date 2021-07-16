@@ -9,7 +9,9 @@ import android.widget.Button
 import android.widget.ProgressBar
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.appcompat.widget.LinearLayoutCompat
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewModelScope
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.firstkotlinapp.R
@@ -20,6 +22,7 @@ import com.example.firstkotlinapp.models.Gifs
 import com.example.firstkotlinapp.values.ErrorHandler
 import com.example.firstkotlinapp.values.PageOperation
 import com.example.firstkotlinapp.viewmodel.RecyclerFragmentViewModel
+import kotlinx.coroutines.launch
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -28,15 +31,13 @@ import retrofit2.Response
 class RecyclerFragment : ButtonSupportedFragment() {
     var isOnScreen = false
     private var type: String? = null
-    private lateinit var recyclerFragmentViewModel: RecyclerFragmentViewModel
+    private val recyclerFragmentViewModel: RecyclerFragmentViewModel by viewModels()
     private var gifsRecyclerAdapter: GifsRecyclerAdapter? = null
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        recyclerFragmentViewModel = ViewModelProvider(this).get(
-            RecyclerFragmentViewModel::class.java
-        )
+
         if (arguments != null) {
             type = requireArguments().getString("TAB_TYPE")
             recyclerFragmentViewModel.setType(type)
@@ -44,31 +45,11 @@ class RecyclerFragment : ButtonSupportedFragment() {
             Log.e("TAG_MAIN_FRAG", "No arguments in bundle")
         }
         Log.d("TYPE", type!!)
-        loadGifs(PageOperation.STAND, type)
+        loadGifs(PageOperation.STAND, type!!)
     }
 
-    private val gifsCallback: Callback<Gifs> = object : Callback<Gifs> {
-        override fun onResponse(call: Call<Gifs>, response: Response<Gifs>) {
-            if (response.isSuccessful) {
-                recyclerFragmentViewModel.setCanLoadNext(true)
-                if (response.body() != null) response.body()!!.gifs?.let {
-                    recyclerFragmentViewModel.createListOfGifModels(it)
-                }
-            } else {
-                val errorHandler = ErrorHandler()
-                errorHandler.setLoadError()
-                recyclerFragmentViewModel.setError(errorHandler)
-            }
-        }
 
-        override fun onFailure(call: Call<Gifs>, t: Throwable) {
-            val errorHandler = ErrorHandler()
-            errorHandler.setLoadError()
-            recyclerFragmentViewModel.setError(errorHandler)
-        }
-    }
-
-    private fun loadGifs(pageOperation: PageOperation?, type: String?) {
+    private fun loadGifs(pageOperation: PageOperation?, type: String) {
         recyclerFragmentViewModel.setCanLoadNext(
             recyclerFragmentViewModel.error.value?.currentError
                 .equals(ErrorHandler.success())
@@ -80,20 +61,10 @@ class RecyclerFragment : ButtonSupportedFragment() {
                 )
             }
         }
-        val service: Api = Instance.getInstance().create(Api::class.java)
-        when (type) {
-            "latest" -> recyclerFragmentViewModel.currentPage.value?.let {
-                service.getLatestGifs(
-                    it,
-                    10,
-                    "gif"
-                ).enqueue(gifsCallback)
-            }
-            "top" -> service.getTopGifs(
-                recyclerFragmentViewModel.currentPage.value!!,
-                10,
-                "gif"
-            ).enqueue(gifsCallback)
+
+        recyclerFragmentViewModel.viewModelScope.launch {
+            recyclerFragmentViewModel.loadRecyclerGifs(type)
+
         }
     }
 
@@ -111,8 +82,23 @@ class RecyclerFragment : ButtonSupportedFragment() {
         btnNex = requireActivity().findViewById(R.id.btn_next)
         recyclerView.setHasFixedSize(true)
         recyclerView.layoutManager = GridLayoutManager(context, 1)
-        onNextClickListener = View.OnClickListener { loadGifs(PageOperation.NEXT, type) }
-        onPrevClickListener = View.OnClickListener { loadGifs(PageOperation.PREVIOUS, type) }
+
+        onNextClickListener = View.OnClickListener {
+            type?.let { it1 ->
+                loadGifs(
+                    PageOperation.NEXT,
+                    it1
+                )
+            }
+        }
+        onPrevClickListener = View.OnClickListener {
+            type?.let { it1 ->
+                loadGifs(
+                    PageOperation.PREVIOUS,
+                    it1
+                )
+            }
+        }
         recyclerFragmentViewModel.getGifModels().observe(viewLifecycleOwner) { gifs ->
             if (gifs != null) {
                 errorHandler.setSuccess()
@@ -142,7 +128,7 @@ class RecyclerFragment : ButtonSupportedFragment() {
                     if (errorProgressBar.visibility == View.INVISIBLE) {
                         errorProgressBar.visibility = View.VISIBLE
                         if (e.currentError == ErrorHandler.loadError()) {
-                            loadGifs(PageOperation.STAND, type)
+                            type?.let { loadGifs(PageOperation.STAND, it) }
                         }
                     }
                 }

@@ -26,9 +26,7 @@ class RandomFragmentViewModel : PageViewModel() {
                     RandomFragment.errorHandler.setSuccess()
                 setAppError(RandomFragment.errorHandler)
                 if (response.body() != null) {
-                    response.body()!!.createGifModel()
-                        .let { addGifModel(it) }
-                    //   loadGifWithGlide(response.body()!!.createGifModel().gifURL)
+                    response.body()!!.createGifModel().let { addGifModel(it) }
                 }
             } else {
                 RandomFragment.errorHandler.setLoadError()

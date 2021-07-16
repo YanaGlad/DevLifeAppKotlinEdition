@@ -49,50 +49,13 @@ class RandomFragment : ButtonSupportedFragment() {
     private lateinit var subtitle: AppCompatTextView
     private lateinit var savedUrl: String
 
-    private val gifCallback: Callback<Gif> = object : Callback<Gif> {
-        override fun onResponse(call: Call<Gif>, response: Response<Gif>) {
-            if (response.isSuccessful) {
-                if (randomFragmentViewModel.getError()
-                        .value!!.currentError == ErrorHandler.loadError()
-                )
-                    errorHandler.setSuccess()
-                randomFragmentViewModel.setAppError(errorHandler)
-                if (response.body() != null) {
-                    response.body()!!.createGifModel()
-                        .let { randomFragmentViewModel.addGifModel(it) }
-                    loadGifWithGlide(response.body()!!.createGifModel().gifURL)
-                }
-            } else {
-                errorHandler.setLoadError()
-                randomFragmentViewModel.setAppError(errorHandler)
-                Log.e("Callback error", "Can't load post")
-            }
-        }
-
-        override fun onFailure(call: Call<Gif>, t: Throwable) {
-            errorHandler.setLoadError()
-            randomFragmentViewModel.setAppError(errorHandler)
-            Log.e("Callback error", "onFailure: $t")
-        }
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-       /// randomFragmentViewModel = ViewModelProvider(this).get(
-       //     RandomFragmentViewModel::class.java
-       // )
-
 
         randomFragmentViewModel.viewModelScope.launch {
             randomFragmentViewModel.loadRandomGif()
             loadGifWithGlide(randomFragmentViewModel.getCurrentGif().value?.gifURL)
-         //   viewModel.loadApod()
-          //  explanation?.setText(viewModel.apodModel?.explanation)
-           // viewModel.apodModel?.url?.let { loadGifWithGlide(it) }
         }
-
-//        val api: Api = Instance.getInstance().create(Api::class.java)
-//        api.getRandomGif().enqueue(gifCallback)
 
         onPrevClickListener = View.OnClickListener {
             if (!randomFragmentViewModel.goBack()) Log.e(
@@ -239,13 +202,8 @@ class RandomFragment : ButtonSupportedFragment() {
             randomFragmentViewModel.viewModelScope.launch {
                 randomFragmentViewModel.loadRandomGif()
                 loadGifWithGlide(randomFragmentViewModel.getCurrentGif().value?.gifURL)
-                //   viewModel.loadApod()
-                //  explanation?.setText(viewModel.apodModel?.explanation)
-                // viewModel.apodModel?.url?.let { loadGifWithGlide(it) }
             }
 
-//            val api: Api = Instance.getInstance().create(Api::class.java)
-//            api.getRandomGif().enqueue(gifCallback)
         } else loadGifWithGlide(
             randomFragmentViewModel.getCurrentGif().value?.gifURL
         )
